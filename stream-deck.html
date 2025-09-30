@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Deck</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .deck-container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .deck-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 600px;
+        }
+
+        .deck-button {
+            width: 150px;
+            height: 150px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .deck-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .deck-button:active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon {
+            font-size: 48px;
+        }
+
+        .volume-up { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .volume-down { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .mute { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .play-pause { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .next { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .previous { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+
+        .status {
+            margin-top: 20px;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            min-height: 30px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="deck-container">
+        <div class="deck-grid">
+            <button class="deck-button volume-up" data-action="volume-up">
+                <span class="icon">🔊</span>
+                <span>Volume Up</span>
+            </button>
+            <button class="deck-button volume-down" data-action="volume-down">
+                <span class="icon">🔉</span>
+                <span>Volume Down</span>
+            </button>
+            <button class="deck-button mute" data-action="mute">
+                <span class="icon">🔇</span>
+                <span>Mute</span>
+            </button>
+            <button class="deck-button play-pause" data-action="play-pause">
+                <span class="icon">⏯️</span>
+                <span>Play/Pause</span>
+            </button>
+            <button class="deck-button next" data-action="next">
+                <span class="icon">⏭️</span>
+                <span>Next Track</span>
+            </button>
+            <button class="deck-button previous" data-action="previous">
+                <span class="icon">⏮️</span>
+                <span>Previous Track</span>
+            </button>
+        </div>
+        <div class="status" id="status">Ready</div>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const buttons = document.querySelectorAll('.deck-button');
+
+        function showStatus(message) {
+            statusEl.textContent = message;
+            setTimeout(() => {
+                statusEl.textContent = 'Ready';
+            }, 2000);
+        }
+
+        buttons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const action = button.getAttribute('data-action');
+
+                try {
+                    const response = await fetch('/api/action', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ action })
+                    });
+
+                    if (response.ok) {
+                        showStatus(`✓ ${button.textContent.trim()}`);
+                    } else {
+                        showStatus('⚠️ Action triggered (no server)');
+                        console.log(`Action: ${action}`);
+                    }
+                } catch (error) {
+                    // Fallback for when no server is running
+                    showStatus(`⚠️ ${button.textContent.trim()} (no server)`);
+                    console.log(`Action would execute: ${action}`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
