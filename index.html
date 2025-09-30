@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Deck</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .deck-container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .deck-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 600px;
+        }
+
+        .deck-button {
+            width: 150px;
+            height: 150px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .deck-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .deck-button:active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon {
+            font-size: 48px;
+        }
+
+        .volume-up { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .volume-down { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .mute { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .play-pause { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .next { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .previous { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+
+        .status {
+            margin-top: 20px;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            min-height: 30px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .note {
+            margin-top: 15px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="deck-container">
+        <div class="deck-grid">
+            <button class="deck-button volume-up" data-action="volume-up">
+                <span class="icon">🔊</span>
+                <span>Volume Up</span>
+            </button>
+            <button class="deck-button volume-down" data-action="volume-down">
+                <span class="icon">🔉</span>
+                <span>Volume Down</span>
+            </button>
+            <button class="deck-button mute" data-action="mute">
+                <span class="icon">🔇</span>
+                <span>Mute</span>
+            </button>
+            <button class="deck-button play-pause" data-action="play-pause">
+                <span class="icon">⏯️</span>
+                <span>Play/Pause</span>
+            </button>
+            <button class="deck-button next" data-action="next">
+                <span class="icon">⏭️</span>
+                <span>Next Track</span>
+            </button>
+            <button class="deck-button previous" data-action="previous">
+                <span class="icon">⏮️</span>
+                <span>Previous Track</span>
+            </button>
+        </div>
+        <div class="status" id="status">Ready - Use keyboard shortcuts</div>
+        <div class="note">
+            ℹ️ This page uses keyboard shortcuts. Grant permissions when prompted.
+        </div>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const buttons = document.querySelectorAll('.deck-button');
+
+        // Simulated audio element for demonstration
+        let audioElement = null;
+        let isMuted = false;
+
+        function showStatus(message) {
+            statusEl.textContent = message;
+            setTimeout(() => {
+                statusEl.textContent = 'Ready - Use keyboard shortcuts';
+            }, 2000);
+        }
+
+        // Create a demo audio element if user wants to test
+        function initAudio() {
+            if (!audioElement) {
+                audioElement = new Audio();
+                audioElement.loop = true;
+                audioElement.volume = 0.5;
+            }
+            return audioElement;
+        }
+
+        buttons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const action = button.getAttribute('data-action');
+
+                try {
+                    const audio = initAudio();
+
+                    switch(action) {
+                        case 'volume-up':
+                            if (audio.volume < 1) {
+                                audio.volume = Math.min(audio.volume + 0.1, 1);
+                            }
+                            showStatus(`🔊 Volume: ${Math.round(audio.volume * 100)}%`);
+                            break;
+
+                        case 'volume-down':
+                            if (audio.volume > 0) {
+                                audio.volume = Math.max(audio.volume - 0.1, 0);
+                            }
+                            showStatus(`🔉 Volume: ${Math.round(audio.volume * 100)}%`);
+                            break;
+
+                        case 'mute':
+                            isMuted = !isMuted;
+                            audio.muted = isMuted;
+                            showStatus(isMuted ? '🔇 Muted' : '🔊 Unmuted');
+                            break;
+
+                        case 'play-pause':
+                            if (audio.paused) {
+                                // Note: autoplay might be blocked by browser
+                                showStatus('⏸️ Demo: Play triggered');
+                            } else {
+                                audio.pause();
+                                showStatus('▶️ Demo: Pause triggered');
+                            }
+                            break;
+
+                        case 'next':
+                            showStatus('⏭️ Demo: Next track (simulated)');
+                            break;
+
+                        case 'previous':
+                            showStatus('⏮️ Demo: Previous track (simulated)');
+                            break;
+                    }
+
+                    // Trigger keyboard events for media keys
+                    // Note: Most browsers don't allow triggering media keys programmatically
+                    // This is a limitation of the browser security model
+                    console.log(`Action triggered: ${action}`);
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    showStatus('⚠️ Browser limitation - see console');
+                }
+            });
+        });
+
+        // Listen for actual media key presses
+        navigator.mediaSession.setActionHandler('play', () => {
+            showStatus('▶️ Play key pressed');
+        });
+
+        navigator.mediaSession.setActionHandler('pause', () => {
+            showStatus('⏸️ Pause key pressed');
+        });
+
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+            showStatus('⏭️ Next track key pressed');
+        });
+
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+            showStatus('⏮️ Previous track key pressed');
+        });
+    </script>
+</body>
+</html>
