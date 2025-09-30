@@ -1,28 +1,24 @@
-# Stream Deck
+# Stream Deck (GitHub Pages Version)
 
-A web-based stream deck app with buttons to control your Mac's volume and media playback.
+A web-based stream deck app with media control buttons.
 
 ## Features
 
-- 🔊 Volume Up
-- 🔉 Volume Down
-- 🔇 Mute/Unmute
+- 🔊 Volume Up/Down (demo audio)
+- 🔇 Mute/Unmute (demo audio)
 - ⏯️ Play/Pause
 - ⏭️ Next Track
 - ⏮️ Previous Track
 
 ## Usage
 
-1. Start the server:
-```bash
-node stream-deck-server.js
-```
+Simply open `index.html` in your browser or visit the GitHub Pages site.
 
-2. Open your browser to http://localhost:3000
+**Note:** Due to browser security limitations, this version demonstrates volume controls on a demo audio element and registers media session handlers. It cannot directly control system volume or media playback.
 
-3. Click the buttons to control your Mac
+For full system control on macOS, see the [V1 branch](../../tree/V1) which uses a Node.js server with AppleScript.
 
-## Requirements
+## Branches
 
-- Node.js
-- macOS (uses AppleScript for system control)
+- **pages** - Static HTML version for GitHub Pages (current branch)
+- **V1** - Node.js server version with full macOS system control
